@@ -1,0 +1,35 @@
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th class="sample">Sample</th>
+            <th class="theme">Theme</th>
+            <th class="severity">Severity</th>
+            <th class="filename">Filename</th>                        
+            <th class="action">&nbsp;</th>
+        </tr>
+    </thead>
+    <tbody ng-controller="SampleCtrl">
+        <tr ng-repeat="sample in samples">
+            <td class="sample">{{sample.name}}</td>
+            <td class="theme">{{sample.theme}}</td>
+            <td class="severify">{{sample.severity}}</td>
+            <td class="filename">{{sample.filename}}</td>
+            <td class="action">
+                <button ng-click="play(sample)" type="button" class="btn btn-default btn-xs">
+                    <span class="glyphicon glyphicon-play"></span> 
+                </button>                        
+                <button ng-click="remove($index)" type="button" class="btn btn-default btn-xs">
+                    <span class="glyphicon glyphicon-remove"></span> 
+                </button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<div ng-controller="ModalDemoCtrl">
+    <button ng-click="open()" type="button" class="btn btn-primary">
+        <span class="glyphicon glyphicon-plus">Add</span> 
+    </button>            
+</div>
+
+<audio>

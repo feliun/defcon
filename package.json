@@ -1,0 +1,32 @@
+{
+  "name": "defcon",
+  "version": "0.0.0",
+  "description": "Plays audible warnings",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "~3.4.0",
+    "optimist": "~0.6.0",
+    "underscore": "~1.5.2",
+    "async": "~0.2.9",
+    "mongodb": "~1.3.19",
+    "cors": "~1.0.1",
+    "colors": "~0.6.2",
+    "http-status-codes": "~1.0.2",
+    "uuid": "~1.4.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http;//github.com/acuminous/defcon"
+  },
+  "keywords": [
+    "Audible",
+    "Alerts",
+    "Rest"
+  ],
+  "author": "Stephen Cresswell",
+  "license": "BSD-2-Clause"
+}

@@ -1,0 +1,122 @@
+body {
+    padding-top: 50px;
+}
+
+.defcon {
+    text-align: left;
+    width: 3em;
+}
+
+.defcon span {
+    text-align: center;
+    padding: 0.5em 1.5em;    
+    border-radius: 4px;
+}
+
+.defcon-1 span {
+    background-color: #ff0200;
+    background: -webkit-radial-gradient(circle, #fb9327, #ff0200);
+    background: -moz-radial-gradient(circle, #fb9327, #ff0200);
+}
+
+.defcon-2 span {
+    background-color: #ed7233;
+    background: -webkit-radial-gradient(circle, #f5b433, #ed7233);
+    background: -moz-radial-gradient(circle, #f5b433, #ed7233);
+}
+
+.defcon-3 span {
+    background-color: #fdf731;
+    background: -webkit-radial-gradient(circle, #f8c233, #fdf731);
+    background: -moz-radial-gradient(circle, #f8c233, #fdf731);
+}
+
+.defcon-4 span {
+    background-color: #7bea15;
+    background: -webkit-radial-gradient(circle, #65c10f, #7bea15);
+    background: -moz-radial-gradient(circle, #65c10f, #7bea15);
+}
+
+.defcon-5 span {
+    background-color: #026dfb; 
+    background: -webkit-radial-gradient(circle, #41adfb, #026dfb);
+    background: -moz-radial-gradient(circle, #41adfb, #026dfb);
+}
+
+
+table .theme {
+    width: 20%;
+}
+
+table .severity {
+    width: 20%;
+}
+
+table .filename {
+    width: 20%;
+}
+
+table .action {
+    width:10%;
+    text-align: right;
+}
+
+form #severity .btn {
+    border: none;
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+}
+
+form #severity .btn:last-child {
+    border-right: 1px solid #ccc;  
+    border-bottom-right-radius: 4px;  
+    border-top-right-radius: 4px;  
+}
+
+form #severity .btn:first-child {
+    border-left: 1px solid #ccc;      
+    border-bottom-left-radius: 4px;  
+    border-top-left-radius: 4px;  
+}
+
+/* Nicer file input styling */
+.btn-xs .glyphicon {
+    top: 2px;
+}
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 999px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    background: red;
+    cursor: inherit;
+    display: block;
+}
+.input-group .form-control:first-child {
+    border-right: none;
+}
+
+
+/* angulajs bootstrap-ui fixes for bootstrap 3 */
+.modal {
+    display: block;
+}
+.modal-body:before,
+.modal-body:after {
+    display: table;
+    content: " ";
+}
+.modal-header:before,
+.modal-header:after {
+    display: table;
+    content: " ";
+}

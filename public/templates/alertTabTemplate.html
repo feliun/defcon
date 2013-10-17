@@ -1,0 +1,29 @@
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th class="severity">Severity</th>
+            <th class="date">Date</th>
+            <th class="system">System</th>
+            <th class="host">Host</th>
+            <th class="message">Message</th>
+            <th class="action">&nbsp;</th>
+        </tr>
+    </thead>
+    <tbody ng-controller="AlertCtrl">
+        <tr ng-repeat="alert in alerts | orderBy:['severity','-date']">
+            <td class="severity"><span class="defcon defcon-{{alert.severity}}">{{alert.severity}}</span></td>
+            <td class="date">{{alert.date}}</td>
+            <td class="system">{{alert.system}}</td>
+            <td class="host">{{alert.host}}</td>
+            <td class="message">{{alert.message}}</td>
+            <td class="action">
+                <a ng-show="alert.link" href="{{alert.link}}"><button type="button" class="btn btn-default btn-xs">
+                    <span class="glyphicon glyphicon-link"></span>
+                </button></a>
+                <button ng-click="remove($index)" type="button" class="btn btn-default btn-xs">
+                    <span class="glyphicon glyphicon-remove"></span>
+                </button>
+            </td>
+        </tr>
+    </tbody>
+</table>
