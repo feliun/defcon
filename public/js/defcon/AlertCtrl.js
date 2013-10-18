@@ -23,14 +23,16 @@ defconApp.controller('AlertCtrl', function AlertCtrl($scope, $http, $timeout) {
 
     $scope.remove = function(index) {
         var alert = $scope.alerts[index];
-        $http.delete(alert.url).success(function(data) {
+        $http.delete(alert.url).success(function() {
             $scope.alerts.splice(index, 1);
         })
     }
 
     function refresh() {
-        $http.get('alert').success(function(data) {
-            $scope.alerts = data;
+        $http.get('alert').success(function(alerts) {
+            $scope.alerts = _.map(alerts, function(alert) {
+                return _.extend(alert, { timeago: moment(alert.date).fromNow() })
+            });
         });
     }
 
