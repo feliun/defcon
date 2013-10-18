@@ -93,10 +93,12 @@ module.exports = (function() {
     function extractAlert(req, next) {
         if (!_.isObject(req.body)) return next(new Error('Missing body'));
         if (!req.body.system) return next(new Error('system must be specified'));
+        if (!req.body.type) return next(new Error('type must be specified'));
 
         next(null, _.chain(req.body).clone().extend({
             resourceId: uuid.v1()
         }).defaults({
+            group: req.body.system,
             host: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
             severity: 1,
             date: new Date()

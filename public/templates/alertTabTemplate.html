@@ -3,7 +3,9 @@
         <tr>
             <th class="severity">Severity</th>
             <th class="date">Date</th>
+            <th class="type">Type</th>
             <th class="system">System</th>
+            <th class="group">Group</th>
             <th class="host">Host</th>
             <th class="message">Message</th>
             <th class="action">&nbsp;</th>
@@ -13,7 +15,9 @@
         <tr ng-repeat="alert in alerts | orderBy:['severity','-date']">
             <td class="severity"><span class="defcon defcon-{{alert.severity}}">{{alert.severity}}</span></td>
             <td class="date">{{alert.date}}</td>
+            <td class="type">{{alert.type}}</td>
             <td class="system">{{alert.system}}</td>
+            <td class="group">{{alert.group}}</td>
             <td class="host">{{alert.host}}</td>
             <td class="message">{{alert.message}}</td>
             <td class="action">
