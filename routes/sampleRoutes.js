@@ -19,7 +19,7 @@ var _ = require('underscore');
 var uuid = require('uuid');
 var async = require('async');
 var fs = require('fs');
-var sample = require('../lib/entity').sample();
+var sample = require('../lib/store').sample();
 
 module.exports = (function() {
 

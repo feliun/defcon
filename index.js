@@ -16,7 +16,7 @@
 
 var colors = require('colors');
 var async = require('async');
-var entity = require('./lib/entity')
+var store = require('./lib/store')
 var server = require('./lib/server');
 var quote = require('./lib/quotes');
 
@@ -29,7 +29,7 @@ var argv = require('optimist')
     .argv;
 
 var tasks = [
-    entity.connect.bind(entity, argv.mh, argv.mp),
+    store.connect.bind(store, argv.mh, argv.mp),
     server.listen.bind(server, argv.p, argv.h)
 ];
 

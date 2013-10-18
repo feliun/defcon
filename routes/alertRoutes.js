@@ -19,8 +19,8 @@ var _ = require('underscore');
 var async = require('async');
 var uuid = require('uuid');
 var player = require('../lib/player');
-var sample = require('../lib/entity').sample();
-var alert = require('../lib/entity').alert();
+var sample = require('../lib/store').sample();
+var alert = require('../lib/store').alert();
 var DEFAULT_SAMPLES = [
     'samples/ashamed.mp3',
     'samples/bad_man.mp3',
