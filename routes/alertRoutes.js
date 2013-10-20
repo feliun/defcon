@@ -39,7 +39,7 @@ module.exports = (function() {
         app.post('/alert', create);
         app.get('/alert', list)
         app.delete('/alert/:resourceId', remove);
-    };
+    }
 
     function create(req, res) {
         extractAlert(req, function(err, data) {
@@ -85,7 +85,7 @@ module.exports = (function() {
         if (!req.params.resourceId) return res.send(SC.BAD_REQUEST, 'resourceId is required')
         alert.remove(req.params.resourceId, function(err, alert) {
             if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
-            if (!alert) return res.send(SC.NOT_FOUND);
+            if (!alert) return res.send(SC.NOT_FOUND, 'The alert does not exist');
             res.send(SC.NO_CONTENT);
         })
     }

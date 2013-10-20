@@ -25,6 +25,8 @@ defconApp.controller('AlertCtrl', function AlertCtrl($scope, $http, $timeout) {
         var alert = $scope.alerts[index];
         $http.delete(alert.url).success(function() {
             $scope.alerts.splice(index, 1);
+        }).error(function(text) {
+            $scope.addMessage(text, 'danger');
         })
     }
 

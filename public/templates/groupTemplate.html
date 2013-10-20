@@ -1,0 +1,28 @@
+<div  ng-controller="GroupCtrl">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th class="group">Group</th>
+                <th class="theme">Theme</th>
+                <th class="action">&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="group in groups | orderBy:['name']">
+                <td class="group">{{group.name}}</td>
+                <td class="theme">{{group.theme}}</td>
+                <td class="action">
+                    <button ng-click="remove($index)" type="button" class="btn btn-default btn-xs">
+                        <span class="glyphicon glyphicon-remove"></span>
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div ng-controller="GroupModalCtrl">
+        <button ng-click="open()" type="button" class="btn btn-primary pull-right">
+            <span class="glyphicon glyphicon-plus">Add</span>
+        </button>
+    </div>
+</div>

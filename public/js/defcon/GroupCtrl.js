@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-module.exports.init = function(app) {
+defconApp.controller('GroupCtrl', function GroupCtrl($scope, $http, $timeout) {
 
-    var routes = [
-        require('./groupRoutes'),
-        require('./alertRoutes'),
-        require('./sampleRoutes')
-    ];
+    $scope.remove = function(index) {
+        var group = $scope.groups[index];
+        $http.delete(group.url).success(function(data) {
+            $scope.groups.splice(index, 1);
+        }).error(function(text) {
+            $scope.addMessage(text, 'danger');
+        })
+    }
 
-    routes.forEach(function(route) {
-        route.init(app);
-    })
+    function refresh() {
+        $http.get('group').success(function(data) {
+            $scope.groups = data;
+        });
+    }
 
-    return app;
-}
+    refresh();
+});
+
