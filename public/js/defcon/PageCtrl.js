@@ -17,8 +17,9 @@
 defconApp.controller('PageCtrl', function PageCtrl($scope) {
 
     $scope.tabs = {
+        alerts: { template: 'alertTemplate.html' },
         groups: { template: 'groupTemplate.html' },
-        alerts: { template: 'alertTemplate.html' }
+        samples: { template: 'sampleTemplate.html' }
     }
     $scope.currentTab = $scope.tabs.alerts;
     $scope.messages = [];
@@ -33,8 +34,8 @@ defconApp.controller('PageCtrl', function PageCtrl($scope) {
         return $scope.currentTab === $scope.tabs[tab];
     }
 
-    $scope.addMessage = function(text, type) {
-        $scope.messages.push({ text: text, type: type });
+    $scope.message = function(text, type) {
+        $scope.messages = [{ text: text || 'An unexpected error occurred', type: type || 'error' }];
     }
 
     $scope.closeMessage = function(index) {

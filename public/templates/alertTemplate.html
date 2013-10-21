@@ -1,33 +1,37 @@
-<table class="table table-hover">
-    <thead>
-        <tr>
-            <th class="severity">Severity</th>
-            <th class="type">Type</th>
-            <th class="group">Group</th>
-            <th class="system">System</th>
-            <th class="host">Host</th>
-            <th class="timeago">When</th>
-            <th class="message">Message</th>
-            <th class="action">&nbsp;</th>
-        </tr>
-    </thead>
-    <tbody ng-controller="AlertCtrl">
-        <tr ng-repeat="alert in alerts | orderBy:['severity','-date']">
-            <td class="severity"><span class="defcon defcon-{{alert.severity}}">{{alert.severity}}</span></td>
-            <td class="type">{{alert.type}}</td>
-            <td class="group">{{alert.group}}</td>
-            <td class="system">{{alert.system}}</td>
-            <td class="host">{{alert.host}}</td>
-            <td class="timeago" title="{{alert.date}}">{{alert.timeago}}</td>
-            <td class="message">{{alert.message}}</td>
-            <td class="action">
-                <a ng-show="alert.link" href="{{alert.link}}"><button type="button" class="btn btn-default btn-xs">
-                    <span class="glyphicon glyphicon-hand-right"></span>
-                </button></a>
-                <button ng-click="remove($index)" type="button" class="btn btn-default btn-xs">
-                    <span class="glyphicon glyphicon-remove"></span>
-                </button>
-            </td>
-        </tr>
-    </tbody>
-</table>
+<div ng-controller="AlertCtrl">
+    <table ng-show="alerts.length" class="table table-hover">
+        <thead>
+            <tr>
+                <th class="severity">Severity</th>
+                <th class="type">Type</th>
+                <th class="group">Group</th>
+                <th class="system">System</th>
+                <th class="host">Host</th>
+                <th class="timeago">When</th>
+                <th class="message">Message</th>
+                <th class="action">&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="alert in alerts | orderBy:['severity','-date']">
+                <td class="severity"><span class="defcon defcon-{{alert.severity}}">{{alert.severity}}</span></td>
+                <td class="type">{{alert.type}}</td>
+                <td class="group">{{alert.group}}</td>
+                <td class="system">{{alert.system}}</td>
+                <td class="host">{{alert.host}}</td>
+                <td class="timeago" title="{{alert.date}}">{{alert.timeago}}</td>
+                <td class="message">{{alert.message}}</td>
+                <td class="action">
+                    <a ng-show="alert.link" href="{{alert.link}}"><button type="button" class="btn btn-default btn-xs">
+                        <span class="glyphicon glyphicon-hand-right"></span>
+                    </button></a>
+                    <button ng-click="remove($index)" type="button" class="btn btn-default btn-xs">
+                        <span class="glyphicon glyphicon-remove"></span>
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div ng-hide="alerts.length">There are no alerts.</div>
+</div>

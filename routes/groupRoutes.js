@@ -29,22 +29,29 @@ module.exports = (function() {
         app.delete('/group/:resourceId', remove);
     };
 
+    function expose(group) {
+        return _.chain(group)
+                .omit('_id', 'resourceId')
+                .extend({ url: '/group/' + group.resourceId })
+                .value()
+    }
+
     function create(req, res) {
         extractGroupData(req, function(err, data) {
             if (err) return res.send(SC.BAD_REQUEST, err.message);
             group.create(data, function(err, group) {
                 if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
-                res.json({ url: '/group/' + group.resourceId });
+                res.json(expose(group));
             })
         })
     }
 
     function list(req, res) {
         extractCriteria(req, function(err, criteria) {
-            group.list(criteria, function(err, groups) {
+            group.list({}, function(err, groups) {
                 if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
                 res.json(_.map(groups, function(group) {
-                    return _.chain(group).omit('resourceId', '_id').extend({ url: '/group/' + group.resourceId }).value();
+                    return expose(group);
                 }))
             })
         })

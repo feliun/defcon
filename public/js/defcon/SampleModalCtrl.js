@@ -14,51 +14,76 @@
  * limitations under the License.
  */
 
-var ModalDemoCtrl = function ($scope, $modal, $log) {
+defconApp.controller('SampleModalCtrl', function SampleModalCtrl($scope, $modal, $http) {
 
-    $scope.items = ['item1', 'item2', 'item3'];
+    $scope.lastTheme;
 
     $scope.open = function () {
 
         var modalInstance = $modal.open({
             templateUrl: '/templates/sampleModalTemplate.html',
-            controller: ModalInstanceCtrl,
+            controller: SampleModalInstanceCtrl,
             resolve: {
-                items: function () {
-                    return $scope.items;
+                samples: function() {
+                    return $scope.samples;
+                },
+                lastTheme: function() {
+                    return $scope.lastTheme;
                 }
             }
-        });
+        })
 
-        modalInstance.result.then(function (selectedItem) {
-            $scope.selected = selectedItem;
-        }, function () {
-            $log.info('Modal dismissed at: ' + new Date());
-        });
-    };
-};
+        function byName(name, theme) {
+            if (arguments.length == 1) return byName.bind(name);
+            return theme.name == name;
+        }
+    }
+})
 
-var ModalInstanceCtrl = function ($scope, $modalInstance, items) {
+var SampleModalInstanceCtrl = function ($scope, $modalInstance, $http, samples) {
 
-    $scope.items = items;
-    $scope.selected = {
-        item: $scope.items[0]
-    };
+    $scope.messages = [];
+    $scope.filename;
 
-    $scope.browse = function() {
-        console.log("Clicked", this, arguments);
-        var input = $(this);
-        console.log(input);
-        // var numFiles = input.get(0).files ? input.get(0).files.length : 1;
-        // var label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
-        // input.trigger('fileselect', [numFiles, label]);
+    $scope.onFileSelect = function($files) {
+        $scope.file = $files[0];
+        $scope.filename = $scope.file.name;
     }
 
-    $scope.ok = function() {
-        $modalInstance.close($scope.selected.item);
-    };
+    $scope.ok = function(sample) {
+        var save = sample && sample.url ? update : create;
+        save(sample).success(function(data) {
+            samples.push(_.extend(sample, data));
+            $scope.$apply();
+            $modalInstance.close();
+        }).error(function(text) {
+            $scope.messages = [{ text: text, type:  'danger' }];
+            $scope.$apply();
+        })
+    }
 
     $scope.cancel = function() {
         $modalInstance.dismiss('cancel');
-    };
+    }
+
+    function update(sample) {
+        return $http.uploadFile({
+            url: 'sample',
+            method: 'PUT',
+            data: sample,
+            file: $scope.file
+        })
+    }
+
+    function create(sample) {
+        return $http.uploadFile({
+            url: 'sample',
+            data: sample,
+            file: $scope.file
+        })
+    }
+
+    $scope.closeMessage = function(index) {
+        $scope.messages.splice(index, 1);
+    }
 };

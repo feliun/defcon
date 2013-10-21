@@ -16,10 +16,19 @@
 
 defconApp.controller('SampleCtrl', function SampleCtrl($scope, $http) {
 
-    $scope.remove = function(index) {
-        var sample = $scope.samples[index];
-        $http.delete(sample.url).success(function(data) {
-            $scope.samples.splice(index, 1);
+    $scope.samples = [];
+
+    $scope.$watch('samples', function() {
+        $scope.themes = _.chain($scope.samples).pluck('theme').uniq().map(function(name) {
+            return { name: name };
+        }).value();
+    }, true);
+
+    $scope.remove = function(sample) {
+        $http.delete(sample.url).success(function() {
+            $scope.samples = _.without($scope.samples, sample);
+        }).error(function(text) {
+            $scope.messages = [{ text: text || 'An unexpected error occurred', type: type || 'error' }];
         })
     }
 
@@ -27,10 +36,12 @@ defconApp.controller('SampleCtrl', function SampleCtrl($scope, $http) {
         $('audio').attr('src', sample.dataUrl)[0].play();
     }
 
-    $http.get('sample').success(function(data) {
-        $scope.samples = data;
-    });
+    function refresh() {
+        $http.get('sample').success(function(samples) {
+            $scope.samples = samples;
+        });
+    }
 
-    $scope.orderProp = 'theme';
+    refresh();
 });
 

@@ -23,8 +23,9 @@
         <script src="/js/angularjs/angular-1.0.8.min.js"></script>
         <script src="/js/angularjs/ui-bootstrap-0.6.0.min.js"></script>
         <script src="/js/angularjs/ui-bootstrap-tpls-0.6.0.min.js"></script>
+        <script src="/js/angularjs/angular-file-upload-1.0.2.min.js"></script>
 
-        <script>var defconApp = angular.module('defconApp', ['ui.bootstrap']);</script>
+        <script>var defconApp = angular.module('defconApp', ['ui.bootstrap', 'angularFileUpload']);</script>
         <script src="/js/defcon/PageCtrl.js"></script>
         <script src="/js/defcon/AlertCtrl.js"></script>
         <script src="/js/defcon/GroupCtrl.js"></script>
@@ -49,6 +50,7 @@
                     <ul class="nav navbar-nav">
                         <li ng-click="activate($event, 'alerts')" ng-class="{ active: isActive('alerts') }"><a href="#">Alerts</a></li>
                         <li ng-click="activate($event, 'groups')" ng-class="{ active: isActive('groups') }"><a href="#">Groups</a></li>
+                        <li ng-click="activate($event, 'samples')" ng-class="{ active: isActive('samples') }"><a href="#">Themes</a></li>
                     </ul>
                 </div>
             </div>

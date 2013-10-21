@@ -20,17 +20,9 @@ var async = require('async');
 var uuid = require('uuid');
 var player = require('../lib/player');
 var sample = require('../lib/store').sample();
+var group = require('../lib/store').group();
 var alert = require('../lib/store').alert();
-var DEFAULT_SAMPLES = [
-    'samples/ashamed.mp3',
-    'samples/bad_man.mp3',
-    'samples/brain_failure.mp3',
-    'samples/help_me.mp3',
-    'samples/kansas_not.mp3',
-    'samples/lions_tigers_bears.mp3',
-    'samples/my_pretty.mp3',
-    'samples/oz_wrath.mp3'
-];
+var DEFAULT_SAMPLE = 'samples/buzzer.mp3';
 
 
 module.exports = (function() {
@@ -41,30 +33,38 @@ module.exports = (function() {
         app.delete('/alert/:resourceId', remove);
     }
 
+
+    function expose(alert) {
+        return _.chain(alert)
+                .omit('_id', 'resourceId')
+                .extend({ url: '/alert/' + alert.resourceId })
+                .value()
+    }
+
     function create(req, res) {
         extractAlert(req, function(err, data) {
             if (err) return res.send(SC.BAD_REQUEST, err.message);
-            var tasks = [
-                createAlert.bind(this, data),
-                playSample.bind(this, data)
-            ];
-            async.parallel(tasks, function(err) {
+            alert.create(data, function(err, alert) {
                 if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
-                res.json({ resourceId: data.resourceId });
-            });
+                playSample(alert, function(err) {
+                    if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
+                    res.json(expose(alert));
+                })
+            })
         })
     }
 
-    function createAlert(data, next) {
-        alert.create(data, next);
-    };
-
-    function playSample(data, next) {
-        sample.list(_.pick(data, 'system', 'severity'), function(err, samples) {
-            if (err) return next(err);
-            player.play(randomSample(samples) || randomSample(DEFAULT_SAMPLES), next);
+    function playSample(alert, next) {
+        group.get({ name: alert.group }, function(err, group) {
+            if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
+            if (!group) return player.play(DEFAULT_SAMPLE, next);
+            sample.list({ theme: group.theme }, function(err, samples) {
+                if (err) return next(err);
+                if (samples.length == 0) return player.play(DEFAULT_SAMPLE, next);
+                player.play(randomSample(samples).path, next);
+            })
         })
-    };
+    }
 
     function randomSample(samples) {
         return samples[Math.floor(Math.random() * samples.length)];
@@ -75,7 +75,7 @@ module.exports = (function() {
             alert.list(criteria, function(err, alerts) {
                 if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
                 res.json(_.map(alerts, function(alert) {
-                    return _.chain(alert).omit('resourceId', '_id').extend({ url: '/alert/' + alert.resourceId }).value();
+                    return expose(alert);
                 }))
             })
         })
@@ -92,8 +92,8 @@ module.exports = (function() {
 
     function extractAlert(req, next) {
         if (!_.isObject(req.body)) return next(new Error('Missing body'));
-        if (!req.body.system) return next(new Error('system must be specified'));
-        if (!req.body.type) return next(new Error('type must be specified'));
+        if (!req.body.system) return next(new Error('A system must be specified'));
+        if (!req.body.type) return next(new Error('A type must be specified'));
 
         next(null, _.chain(req.body).clone().extend({
             resourceId: uuid.v1()

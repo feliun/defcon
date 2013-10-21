@@ -42,7 +42,7 @@ var GroupModalInstanceCtrl = function($scope, $modalInstance, $http, groups) {
             groups.push(_.extend(group, data));
             $modalInstance.close(group);
         }).error(function(text) {
-            $scope.addMessage(text, 'danger');
+            $scope.message(text, 'danger');
         })
     }
 
@@ -58,8 +58,8 @@ var GroupModalInstanceCtrl = function($scope, $modalInstance, $http, groups) {
         return $http.post('group', group);
     }
 
-    $scope.addMessage = function(text, type) {
-        $scope.messages.push({ text: text, type: type });
+    $scope.message = function(text, type) {
+        $scope.messages = [{ text: text || 'An unexpected error occurred', type: type || 'error' }];
     }
 
     $scope.closeMessage = function(index) {

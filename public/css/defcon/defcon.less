@@ -3,6 +3,13 @@ body {
 }
 
 table {
+
+    caption {
+        font-size: 1.2em;
+        font-weight: bold;
+        text-align: left;
+    }
+
     td {
         border: none !important;
     }
@@ -85,5 +92,31 @@ table {
 .modal-header:after {
     display: table;
     content: " ";
+}
+
+/* Nicer file input styling */
+.btn-xs .glyphicon {
+    top: 2px;
+}
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 999px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    background: red;
+    cursor: inherit;
+    display: block;
+}
+.input-group .form-control:first-child {
+    border-right: none;
 }
 

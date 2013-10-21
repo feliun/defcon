@@ -1,5 +1,5 @@
-<div  ng-controller="GroupCtrl">
-    <table class="table table-hover">
+<div ng-controller="GroupCtrl">
+    <table ng-show="groups.length" class="table table-hover">
         <thead>
             <tr>
                 <th class="group">Group</th>
@@ -25,4 +25,6 @@
             <span class="glyphicon glyphicon-plus">Add</span>
         </button>
     </div>
+
+    <div ng-hide="groups.length">There are no groups.</div>
 </div>

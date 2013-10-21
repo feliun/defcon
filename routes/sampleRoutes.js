@@ -25,10 +25,16 @@ module.exports = (function() {
 
     function init(app) {
         app.post('/sample', create);
-        app.get('/sample/:resourceId', get)
         app.get('/sample/:resourceId/data', data)
         app.get('/sample', list);
         app.delete('/sample/:resourceId', remove);
+    }
+
+    function expose(sample) {
+        return _.chain(sample)
+                .omit('_id', 'resourceId', 'path')
+                .extend({ url: '/sample/' + sample.resourceId, dataUrl: '/sample/' + sample.resourceId + '/data' })
+                .value()
     }
 
     function create(req, res) {
@@ -36,7 +42,7 @@ module.exports = (function() {
             if (err) return res.send(SC.BAD_REQUEST, err.message);
             sample.create(data, function(err, sample) {
                 if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
-                res.json({ resourceId: sample.resourceId });
+                res.json(expose(sample));
             })
         })
     }
@@ -46,29 +52,15 @@ module.exports = (function() {
             sample.list(criteria, function(err, samples) {
                 if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
                 res.json(_.map(samples, function(sample) {
-                    return _.chain(sample).pick('name', 'filename', 'contentType').extend({
-                        url: '/sample/' + sample.resourceId,
-                        dataUrl: '/sample/' + sample.resourceId + '/data'
-                    }).value()
+                    return expose(sample);
                 }))
             })
         })
     }
 
-    function get(req, res) {
-        if (!req.params.resourceId) return res.send(SC.BAD_REQUEST, 'resourceId is required')
-        sample.get(req.params.resourceId, function(err, sample) {
-            if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
-            if (!sample) return res.send(SC.NOT_FOUND);
-            res.json(_.chain(sample).omit('resourceId', '_id').extend({
-                dataUrl: '/sample/' + sample.resourceId + '/data'
-            }))
-        })
-    }
-
     function data(req, res) {
         if (!req.params.resourceId) return res.send(SC.BAD_REQUEST, 'resourceId is required')
-        sample.get(req.params.resourceId, function(err, sample) {
+        sample.get({ resourceId: req.params.resourceId }, function(err, sample) {
             if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
             if (!sample) return res.send(SC.NOT_FOUND);
             fs.readFile(sample.path, function(err, data) {
@@ -97,8 +89,11 @@ module.exports = (function() {
 
     function extractSampleData(req, next) {
         if (!_.isObject(req.body)) return next(new Error('Missing body'));
-        if (_.keys(req.body).length == 0) return next(new Error('Meta data must be specified'));
-        if (!req.files.file) return (new Error('No file uploaded'));
+        if (!req.body.name) return next(new Error('A name is required'));
+        if (!req.files || !req.files.file) return next(new Error('No file uploaded'));
+        if (!req.body.events) return next(new Error('One or more events are required'));
+        if (!req.body.theme) return next(new Error('A theme is required'));
+
         next(null, _.chain(req.body).omit('files').clone().extend({
             resourceId: uuid.v1(),
             filename: req.files.file.name,

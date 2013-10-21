@@ -21,7 +21,7 @@ defconApp.controller('GroupCtrl', function GroupCtrl($scope, $http, $timeout) {
         $http.delete(group.url).success(function(data) {
             $scope.groups.splice(index, 1);
         }).error(function(text) {
-            $scope.addMessage(text, 'danger');
+            $scope.message(text, 'danger');
         })
     }
 
