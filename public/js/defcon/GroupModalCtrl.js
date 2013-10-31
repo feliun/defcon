@@ -14,29 +14,12 @@
  * limitations under the License.
  */
 
-defconApp.controller('GroupModalCtrl', function GroupModalCtrl($scope, $modal, $http) {
+var GroupModalInstanceCtrl = function($scope, $modalInstance, $http, group, groups) {
 
-    $scope.open = function () {
-
-        var modalInstance = $modal.open({
-            templateUrl: '/templates/groupModalTemplate.html',
-            controller: GroupModalInstanceCtrl,
-            resolve: {
-                groups: function() {
-                    return $scope.groups
-                }
-            }
-
-        });
-    }
-})
-
-var GroupModalInstanceCtrl = function($scope, $modalInstance, $http, groups) {
-
+    $scope.group = group;
     $scope.messages = [];
 
     $scope.ok = function(group) {
-
         var save = group && group.url ? update : create;
         save(group).success(function(data) {
             groups.push(_.extend(group, data));

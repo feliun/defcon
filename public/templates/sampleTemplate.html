@@ -16,10 +16,10 @@
                     <td class="filename">{{sample.filename}}</td>
                     <td class="events">{{sample.events}}</td>
                     <td class="action">
-                        <button ng-click="play(sample)" type="button" class="btn btn-default btn-xs">
+                        <button ng-click="play($event, sample)" type="button" class="btn btn-default btn-xs">
                             <span class="glyphicon glyphicon-play"></span>
                         </button>
-                        <button ng-click="remove(sample)" type="button" class="btn btn-default btn-xs">
+                        <button ng-click="remove($event, sample)" type="button" class="btn btn-default btn-xs">
                             <span class="glyphicon glyphicon-remove"></span>
                         </button>
                     </td>

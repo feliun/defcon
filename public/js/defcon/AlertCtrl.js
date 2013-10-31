@@ -21,12 +21,13 @@ defconApp.controller('AlertCtrl', function AlertCtrl($scope, $http, $timeout) {
         refresh();
     }());
 
-    $scope.remove = function(index) {
-        var alert = $scope.alerts[index];
+    $scope.remove = function(event, alert) {
+        event.stopPropagation();
+        event.preventDefault();
         $http.delete(alert.url).success(function() {
-            $scope.alerts.splice(index, 1);
+            $scope.alerts = _.without($scope.alerts, alert);
         }).error(function(text) {
-            $scope.addMessage(text, 'danger');
+            $scope.message(text, 'danger');
         })
     }
 

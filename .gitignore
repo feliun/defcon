@@ -1,4 +1,5 @@
 node_modules/
+samples/[0-9]*
 npm-debug.log
 data
 *.swp

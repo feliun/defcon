@@ -24,7 +24,9 @@ defconApp.controller('SampleCtrl', function SampleCtrl($scope, $http) {
         }).value();
     }, true);
 
-    $scope.remove = function(sample) {
+    $scope.remove = function(event, sample) {
+        event.stopPropagation();
+        event.preventDefault();
         $http.delete(sample.url).success(function() {
             $scope.samples = _.without($scope.samples, sample);
         }).error(function(text) {
@@ -32,7 +34,9 @@ defconApp.controller('SampleCtrl', function SampleCtrl($scope, $http) {
         })
     }
 
-    $scope.play = function(sample) {
+    $scope.play = function(event, sample) {
+        event.stopPropagation();
+        event.preventDefault();
         $('audio').attr('src', sample.dataUrl)[0].play();
     }
 

@@ -8,11 +8,11 @@
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="group in groups | orderBy:['name']">
+            <tr ng-repeat="group in groups | orderBy:['name']" ng-click="open(group)">
                 <td class="group">{{group.name}}</td>
                 <td class="theme">{{group.theme}}</td>
                 <td class="action">
-                    <button ng-click="remove($index)" type="button" class="btn btn-default btn-xs">
+                    <button ng-click="remove($event, group)" type="button" class="btn btn-default btn-xs">
                         <span class="glyphicon glyphicon-remove"></span>
                     </button>
                 </td>
@@ -20,7 +20,7 @@
         </tbody>
     </table>
 
-    <div ng-controller="GroupModalCtrl">
+    <div>
         <button ng-click="open()" type="button" class="btn btn-primary pull-right">
             <span class="glyphicon glyphicon-plus">Add</span>
         </button>

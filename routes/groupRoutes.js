@@ -25,15 +25,13 @@ module.exports = (function() {
 
     function init(app) {
         app.post('/group', create);
+        app.put('/group/:resourceId', update);
         app.get('/group', list)
         app.delete('/group/:resourceId', remove);
-    };
+    }
 
     function expose(group) {
-        return _.chain(group)
-                .omit('_id', 'resourceId')
-                .extend({ url: '/group/' + group.resourceId })
-                .value()
+        return _.chain(group).omit('_id', 'resourceId').extend({ url: '/group/' + group.resourceId }).value()
     }
 
     function create(req, res) {
@@ -46,19 +44,27 @@ module.exports = (function() {
         })
     }
 
+    function update(req, res) {
+        extractGroupData(req, function(err, data) {
+            if (err) return res.send(SC.BAD_REQUEST, err.message);
+            group.update(data, function(err, group) {
+                if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
+                res.json(expose(group));
+            })
+        })
+    }
+
     function list(req, res) {
         extractCriteria(req, function(err, criteria) {
-            group.list({}, function(err, groups) {
+            group.list(criteria, function(err, groups) {
                 if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
-                res.json(_.map(groups, function(group) {
-                    return expose(group);
-                }))
+                res.json(_.map(groups, expose))
             })
         })
     }
 
     function remove(req, res) {
-        if (!req.params.resourceId) return res.send(SC.BAD_REQUEST, 'resourceId is required')
+        if (!req.params.resourceId) return res.send(SC.BAD_REQUEST, 'A resourceId is required')
         group.remove(req.params.resourceId, function(err, group) {
             if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
             if (!group) return res.send(SC.NOT_FOUND, 'The group does not exist');
@@ -75,8 +81,8 @@ module.exports = (function() {
 
     function extractGroupData(req, next) {
         if (!_.isObject(req.body)) return next(new Error('Missing body'));
-        if (!req.body.name) return next(new Error('A name must be specified'));
-        if (!req.body.theme) return next(new Error('A theme must be specified'));
+        if (!req.body.name) return next(new Error('A name is required'));
+        if (!req.body.theme) return next(new Error('A theme is required'));
 
         next(null, _.chain(req.body).clone().extend({
             resourceId: uuid.v1()

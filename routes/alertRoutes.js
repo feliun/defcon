@@ -82,7 +82,7 @@ module.exports = (function() {
     }
 
     function remove(req, res) {
-        if (!req.params.resourceId) return res.send(SC.BAD_REQUEST, 'resourceId is required')
+        if (!req.params.resourceId) return res.send(SC.BAD_REQUEST, 'A resourceId is required')
         alert.remove(req.params.resourceId, function(err, alert) {
             if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
             if (!alert) return res.send(SC.NOT_FOUND, 'The alert does not exist');
@@ -92,8 +92,8 @@ module.exports = (function() {
 
     function extractAlert(req, next) {
         if (!_.isObject(req.body)) return next(new Error('Missing body'));
-        if (!req.body.system) return next(new Error('A system must be specified'));
-        if (!req.body.type) return next(new Error('A type must be specified'));
+        if (!req.body.system) return next(new Error('A system is required'));
+        if (!req.body.type) return next(new Error('A type is required'));
 
         next(null, _.chain(req.body).clone().extend({
             resourceId: uuid.v1()

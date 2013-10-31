@@ -76,7 +76,7 @@ module.exports = (function() {
     }
 
     function remove(req, res) {
-        if (!req.params.resourceId) return res.send(SC.BAD_REQUEST, 'resourceId is required')
+        if (!req.params.resourceId) return res.send(SC.BAD_REQUEST, 'A resourceId is required')
         sample.remove(req.params.resourceId, function(err, sample) {
             if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
             if (!sample) return res.send(SC.NOT_FOUND);

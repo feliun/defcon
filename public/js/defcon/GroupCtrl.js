@@ -14,12 +14,28 @@
  * limitations under the License.
  */
 
-defconApp.controller('GroupCtrl', function GroupCtrl($scope, $http, $timeout) {
+defconApp.controller('GroupCtrl', function GroupCtrl($scope, $http, $timeout, $modal) {
 
-    $scope.remove = function(index) {
-        var group = $scope.groups[index];
+    $scope.open = function(group) {
+        var modalInstance = $modal.open({
+            templateUrl: '/templates/groupModalTemplate.html',
+            controller: GroupModalInstanceCtrl,
+            resolve: {
+                group: function() {
+                    return group;
+                },
+                groups: function() {
+                    return $scope.groups
+                }
+            }
+        });
+    }
+
+    $scope.remove = function(event, group) {
+        event.stopPropagation();
+        event.preventDefault();
         $http.delete(group.url).success(function(data) {
-            $scope.groups.splice(index, 1);
+            $scope.groups = _.without($scope.groups, group);
         }).error(function(text) {
             $scope.message(text, 'danger');
         })
