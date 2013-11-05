@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+var async = require('async');
 var alert = require('../lib/store').alert();
 var tasks = require('../lib/tasks/index');
 var Context = require('../lib/Context');
@@ -26,35 +27,41 @@ module.exports = (function() {
         app.delete('/alert/:resourceId', remove);
     }
 
-    function create(req, res) {
+    function create(req, res, next) {
         var context = new Context(this);
-        tasks.execute([
+        async.series([
             context.apply(tasks.extractAlertData, req),
             context.apply(tasks.createDocument, alert),
             context.apply(tasks.findMatchingSamples),
             context.apply(tasks.pickSample),
             context.apply(tasks.playSample),
-            context.apply(tasks.exposeDocument, alert),
-            context.apply(tasks.done, res)
-        ], res);
+            context.apply(tasks.exposeDocument, alert)
+        ], function(err) {
+            if (err) return next(err);
+            res.json(context.response);
+        });
     }
 
-    function list(req, res) {
+    function list(req, res, next) {
         var context = new Context(this, { criteria: req.query });
-        tasks.execute([
+        async.series([
             context.apply(tasks.listDocuments, alert),
-            context.apply(tasks.exposeDocuments, alert),
-            context.apply(tasks.done, res)
-        ], res);
+            context.apply(tasks.exposeDocuments, alert)
+        ], function(err) {
+            if (err) return next(err);
+            res.json(context.response);
+        });
     }
 
-    function remove(req, res) {
+    function remove(req, res, next) {
         var context = new Context(this);
-        tasks.execute([
+        async.series([
             context.apply(tasks.extractResourceId, req),
-            context.apply(tasks.removeDocument, alert),
-            context.apply(tasks.done, res)
-        ], res);
+            context.apply(tasks.removeDocument, alert)
+        ], function(err) {
+            if (err) return next(err);
+            res.json(context.response);
+        });
     }
 
     return {

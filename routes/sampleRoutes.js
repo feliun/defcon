@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+var async = require('async');
 var sample = require('../lib/store').sample();
 var tasks = require('../lib/tasks/index');
 var Context = require('../lib/Context');
@@ -27,44 +28,52 @@ module.exports = (function() {
         app.delete('/sample/:resourceId', remove);
     }
 
-    function create(req, res) {
+    function create(req, res, next) {
         var context = new Context(this);
-        tasks.execute([
+        async.series([
             context.apply(tasks.extractSampleData, req),
             context.apply(tasks.createDocument, sample),
-            context.apply(tasks.exposeDocument, sample),
-            context.apply(tasks.done, res)
-        ], res);
+            context.apply(tasks.exposeDocument, sample)
+        ], function(err) {
+            if (err) return next(err);
+            res.json(content.response);
+        });
     }
 
-    function list(req, res) {
+    function list(req, res, next) {
         var context = new Context(this, { criteria: req.query });
-        tasks.execute([
+        async.series([
             context.apply(tasks.listDocuments, sample),
-            context.apply(tasks.exposeDocuments, sample),
-            context.apply(tasks.done, res)
-        ], res);
+            context.apply(tasks.exposeDocuments, sample)
+        ], function(err) {
+            if (err) return next(err);
+            res.json(content.response);
+        });
     }
 
-    function data(req, res) {
+    function data(req, res, next) {
         var context = new Context(this);
-        tasks.execute([
+        async.series([
             context.apply(tasks.extractResourceId, req),
             context.apply(tasks.getDocument, sample),
             context.apply(tasks.readSampleFile),
-            context.apply(tasks.serveSampleFile, res),
-            context.apply(tasks.done, res)
-        ], res);
+            context.apply(tasks.serveSampleFile, res)
+        ], function(err) {
+            if (err) return next(err);
+            res.json(content.response);
+        });
     }
 
-    function remove(req, res) {
+    function remove(req, res, next) {
         var context = new Context(this);
-        tasks.execute([
+        async.series([
             context.apply(tasks.extractResourceId, req),
             context.apply(tasks.removeDocument, sample),
-            context.apply(tasks.unlinkSampleFile),
-            context.apply(tasks.done, res)
-        ], res);
+            context.apply(tasks.unlinkSampleFile)
+        ], function(err) {
+            if (err) return next(err);
+            res.json(content.response);
+        });
     }
 
     return {
