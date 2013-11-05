@@ -51,8 +51,8 @@ module.exports = (function() {
         tasks.execute([
             context.apply(tasks.extractResourceId, req),
             context.apply(tasks.getDocument, sample),
-            context.apply(tasks.readFile, context.sample),
-            context.apply(tasks.serveFile, context.sample, res),
+            context.apply(tasks.readSampleFile),
+            context.apply(tasks.serveSampleFile, res),
             context.apply(tasks.done, res)
         ], res);
     }
