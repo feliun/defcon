@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-var SC = require('http-status-codes');
-var _ = require('underscore');
-var uuid = require('uuid');
-var async = require('async');
-var fs = require('fs');
 var sample = require('../lib/store').sample();
+var tasks = require('../lib/tasks/index');
+var Context = require('../lib/Context');
 
 module.exports = (function() {
 
@@ -30,83 +27,44 @@ module.exports = (function() {
         app.delete('/sample/:resourceId', remove);
     }
 
-    function expose(sample) {
-        return _.chain(sample)
-                .omit('_id', 'resourceId', 'path')
-                .extend({ url: '/sample/' + sample.resourceId, dataUrl: '/sample/' + sample.resourceId + '/data' })
-                .value()
-    }
-
     function create(req, res) {
-        extractSampleData(req, function(err, data) {
-            if (err) return res.send(SC.BAD_REQUEST, err.message);
-            sample.create(data, function(err, sample) {
-                if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
-                res.json(expose(sample));
-            })
-        })
+        var context = new Context(this);
+        tasks.execute([
+            context.apply(tasks.extractSampleData, req),
+            context.apply(tasks.createDocument, sample),
+            context.apply(tasks.exposeDocument, sample),
+            context.apply(tasks.done, res)
+        ], res);
     }
 
     function list(req, res) {
-        extractCriteria(req, function(err, criteria) {
-            sample.list(criteria, function(err, samples) {
-                if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
-                res.json(_.map(samples, function(sample) {
-                    return expose(sample);
-                }))
-            })
-        })
+        var context = new Context(this, { criteria: req.query });
+        tasks.execute([
+            context.apply(tasks.listDocuments, sample),
+            context.apply(tasks.exposeDocuments, sample),
+            context.apply(tasks.done, res)
+        ], res);
     }
 
     function data(req, res) {
-        if (!req.params.resourceId) return res.send(SC.BAD_REQUEST, 'resourceId is required')
-        sample.get({ resourceId: req.params.resourceId }, function(err, sample) {
-            if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
-            if (!sample) return res.send(SC.NOT_FOUND);
-            fs.readFile(sample.path, function(err, data) {
-                if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
-                res.writeHead(200, {
-                    'Content-Type': sample.contentType,
-                    'Content-Disposition': 'inline; filename = ' + sample.filename,
-                    'Content-Length': data.length
-                });
-                res.end(data, 'binary');
-            })
-        })
+        var context = new Context(this);
+        tasks.execute([
+            context.apply(tasks.extractResourceId, req),
+            context.apply(tasks.getDocument, sample),
+            context.apply(tasks.readFile, context.sample),
+            context.apply(tasks.serveFile, context.sample, res),
+            context.apply(tasks.done, res)
+        ], res);
     }
 
     function remove(req, res) {
-        if (!req.params.resourceId) return res.send(SC.BAD_REQUEST, 'A resourceId is required')
-        sample.remove(req.params.resourceId, function(err, sample) {
-            if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
-            if (!sample) return res.send(SC.NOT_FOUND);
-            fs.unlink(sample.path, function(err) {
-                if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
-                res.send(SC.NO_CONTENT);
-            })
-        })
-    }
-
-    function extractSampleData(req, next) {
-        if (!_.isObject(req.body)) return next(new Error('Missing body'));
-        if (!req.body.name) return next(new Error('A name is required'));
-        if (!req.files || !req.files.file) return next(new Error('No file uploaded'));
-        if (!req.body.events) return next(new Error('One or more events are required'));
-        if (!req.body.theme) return next(new Error('A theme is required'));
-
-        next(null, _.chain(req.body).omit('files').clone().extend({
-            resourceId: uuid.v1(),
-            filename: req.files.file.name,
-            path: req.files.file.path,
-            contentType: req.files.file.headers['content-type']
-        }).value())
-    }
-
-    function extractCriteria(req, next) {
-        next(null, _.reduce(req.query, function(criteria, value, key) {
-            criteria[key] = value;
-            return criteria;
-        }, {}))
+        var context = new Context(this);
+        tasks.execute([
+            context.apply(tasks.extractResourceId, req),
+            context.apply(tasks.removeDocument, sample),
+            context.apply(tasks.unlinkSampleFile),
+            context.apply(tasks.done, res)
+        ], res);
     }
 
     return {
