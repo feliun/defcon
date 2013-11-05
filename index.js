@@ -16,7 +16,8 @@
 
 var colors = require('colors');
 var async = require('async');
-var store = require('./lib/store')
+var store = require('./lib/store');
+var player = require('./lib/player');
 var server = require('./lib/server');
 var quote = require('./lib/quotes');
 
@@ -30,6 +31,7 @@ var argv = require('optimist')
 
 var tasks = [
     store.connect.bind(store, argv.mh, argv.mp),
+    player.init.bind(player, ['ffmpeg', 'mpg321', 'afplay']),
     server.listen.bind(server, argv.p, argv.h)
 ];
 
