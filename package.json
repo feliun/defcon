@@ -17,7 +17,8 @@
     "cors": "~1.0.1",
     "colors": "~0.6.2",
     "http-status-codes": "~1.0.2",
-    "uuid": "~1.4.1"
+    "uuid": "~1.4.1",
+    "change-case": "~1.0.2"
   },
   "repository": {
     "type": "git",

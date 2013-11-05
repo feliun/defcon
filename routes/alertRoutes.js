@@ -22,8 +22,9 @@ var player = require('../lib/player');
 var sample = require('../lib/store').sample();
 var group = require('../lib/store').group();
 var alert = require('../lib/store').alert();
-var DEFAULT_SAMPLE = 'samples/buzzer.mp3';
-
+var HttpError = require('../lib/HttpError');
+var Context = require('../lib/Context');
+var DEFAULT_SAMPLE = { path: 'samples/buzzer.mp3' };
 
 module.exports = (function() {
 
@@ -33,83 +34,123 @@ module.exports = (function() {
         app.delete('/alert/:resourceId', remove);
     }
 
-
-    function expose(alert) {
-        return _.chain(alert)
-                .omit('_id', 'resourceId')
-                .extend({ url: '/alert/' + alert.resourceId })
-                .value()
-    }
-
     function create(req, res) {
-        extractAlert(req, function(err, data) {
-            if (err) return res.send(SC.BAD_REQUEST, err.message);
-            alert.create(data, function(err, alert) {
-                if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
-                playSample(alert, function(err) {
-                    if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
-                    res.json(expose(alert));
-                })
-            })
-        })
-    }
-
-    function playSample(alert, next) {
-        group.get({ name: alert.group }, function(err, group) {
-            if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
-            if (!group) return player.play(DEFAULT_SAMPLE, next);
-            sample.list({ theme: group.theme }, function(err, samples) {
-                if (err) return next(err);
-                if (samples.length == 0) return player.play(DEFAULT_SAMPLE, next);
-                player.play(randomSample(samples).path, next);
-            })
-        })
-    }
-
-    function randomSample(samples) {
-        return samples[Math.floor(Math.random() * samples.length)];
+        var context = new Context(this);
+        async.series([
+            context.apply(extractAlertData, req),
+            context.apply(createAlert),
+            context.apply(findMatchingSamples),
+            context.apply(pickSample),
+            context.apply(playSample),
+            context.apply(exposeAlertData)
+        ], function(err) {
+            done(err, res, context);
+        });
     }
 
     function list(req, res) {
-        extractCriteria(req, function(err, criteria) {
-            alert.list(criteria, function(err, alerts) {
-                if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
-                res.json(_.map(alerts, function(alert) {
-                    return expose(alert);
-                }))
-            })
+        var context = new Context(this, { criteria: req.query });
+        async.series([
+            context.apply(listAlerts),
+            context.apply(exposeAlertList)
+        ], function(err) {
+            done(err, res, context);
         })
     }
 
     function remove(req, res) {
-        if (!req.params.resourceId) return res.send(SC.BAD_REQUEST, 'A resourceId is required')
-        alert.remove(req.params.resourceId, function(err, alert) {
-            if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
-            if (!alert) return res.send(SC.NOT_FOUND, 'The alert does not exist');
-            res.send(SC.NO_CONTENT);
-        })
+        var context = new Context(this);
+        async.series([
+            context.apply(extractResourceId, req),
+            context.apply(removeAlert)
+        ], function(err) {
+            done(err, res, context);
+        });
     }
 
-    function extractAlert(req, next) {
-        if (!_.isObject(req.body)) return next(new Error('Missing body'));
-        if (!req.body.system) return next(new Error('A system is required'));
-        if (!req.body.type) return next(new Error('A type is required'));
+    function extractAlertData(context, req, next) {
+        if (!_.isObject(req.body)) return next(HttpError.badRequest('Missing body'));
+        if (!req.body.system) return next(HttpError.badRequest('A system is required'));
+        if (!req.body.type) return next(HttpError.badRequest('A type is required'));
 
-        next(null, _.chain(req.body).clone().extend({
+        context.data = _.chain(req.body).clone().extend({
             resourceId: uuid.v1()
         }).defaults({
             group: req.body.system,
             host: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
             severity: 1,
             date: new Date()
-        }).value());
+        }).value();
+        next();
     }
 
-    function extractCriteria(req, next) {
-        next(null, _.reduce(req.query, function(criteria, value, key) {
-            criteria[key] = value;
-            return criteria;
-        }, {}))
+    function extractResourceId(context, req, next) {
+        if (!req.params.resourceId) return next(HttpError.badRequest('A resourceId is required'));
+        context.resourceId = req.params.resourceId;
+        next();
+    }
+
+    function createAlert(context, next) {
+        alert.create(context.data, function(err, alert) {
+            context.alert = alert;
+            next(err);
+        })
+    }
+
+    function findMatchingSamples(context, next) {
+        group.get({ name: alert.group }, function(err, group) {
+            if (err) return next(err);
+            if (!group) return next();
+            sample.list({ theme: group.theme }, function(err, samples) {
+                context.samples = samples;
+                next(err);
+            })
+        })
+    }
+
+    function pickSample(context, next) {
+        context.sample = context.samples ? context.samples[Math.floor(Math.random() * context.samples.length)] : DEFAULT_SAMPLE;
+        next();
+    }
+
+    function playSample(context, next) {
+        player.play(context.sample.path, next);
+    }
+
+    function listAlerts(context, next) {
+        alert.list(context.criteria, function(err, alerts) {
+            context.alerts = alerts;
+            next(err);
+        })
+    }
+
+    function removeAlert(context, next) {
+        alert.remove(context.resourceId, function(err, alert) {
+            if (err) return next(HttpError.internalServerError(err.message));
+            if (!alert) return next(HttpError.notFound('The alert does not exist'));
+            next();
+        })
+    }
+
+    function exposeAlertData(context, next) {
+        context.response = _.chain(context.alert)
+            .omit('_id', 'resourceId')
+            .extend({ url: '/alert/' + alert.resourceId })
+            .value()
+        next();
+    }
+
+    function exposeAlertList(context, next) {
+        context.response = _.map(context.alerts, function(alert) {
+            return _.chain(alert).omit('_id', 'resourceId').extend({ url: '/alert/' + alert.resourceId }).value();
+        })
+        next();
+    }
+
+    function done(err, res, context) {
+        if (err) return res.sendError(err);
+        if (context.response) return res.json(context.response);
+        res.send(SC.NO_CONTENT);
     }
 
     return {

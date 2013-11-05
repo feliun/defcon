@@ -19,7 +19,8 @@ var _ = require('underscore');
 var async = require('async');
 var uuid = require('uuid');
 var group = require('../lib/store').group();
-
+var HttpError = require('../lib/HttpError');
+var Context = require('../lib/Context');
 
 module.exports = (function() {
 
@@ -30,63 +31,109 @@ module.exports = (function() {
         app.delete('/group/:resourceId', remove);
     }
 
-    function expose(group) {
-        return _.chain(group).omit('_id', 'resourceId').extend({ url: '/group/' + group.resourceId }).value()
-    }
-
     function create(req, res) {
-        extractGroupData(req, function(err, data) {
-            if (err) return res.send(SC.BAD_REQUEST, err.message);
-            group.create(data, function(err, group) {
-                if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
-                res.json(expose(group));
-            })
-        })
+        var context = new Context(this);
+        async.series([
+            context.apply(extractGroupData, req),
+            context.apply(createGroup),
+            context.apply(exposeGroupData)
+        ], function(err) {
+            done(err, res, context);
+        });
     }
 
     function update(req, res) {
-        extractGroupData(req, function(err, data) {
-            if (err) return res.send(SC.BAD_REQUEST, err.message);
-            group.update(data, function(err, group) {
-                if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
-                res.json(expose(group));
-            })
-        })
+        var context = new Context(this);
+        async.series([
+            context.apply(extractGroupData, req),
+            context.apply(updateGroup),
+            context.apply(exposeGroupData)
+        ], function(err) {
+            done(err, res, context);
+        });
     }
 
     function list(req, res) {
-        extractCriteria(req, function(err, criteria) {
-            group.list(criteria, function(err, groups) {
-                if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
-                res.json(_.map(groups, expose))
-            })
-        })
+        var context = new Context(this, { criteria: req.query });
+        async.series([
+            context.apply(listGroups),
+            context.apply(exposeGroupList)
+        ], function(err) {
+            done(err, res, context);
+        });
     }
 
     function remove(req, res) {
-        if (!req.params.resourceId) return res.send(SC.BAD_REQUEST, 'A resourceId is required')
-        group.remove(req.params.resourceId, function(err, group) {
-            if (err) return res.send(SC.INTERNAL_SERVER_ERROR, err.message);
-            if (!group) return res.send(SC.NOT_FOUND, 'The group does not exist');
-            res.send(SC.NO_CONTENT);
+        var context = new Context(this);
+        async.series([
+            context.apply(extractResourceId, req),
+            context.apply(removeGroup)
+        ], function(err) {
+            done(err, res, context);
+        });
+    }
+
+    function extractGroupData(context, req, next) {
+
+        if (!_.isObject(req.body)) return next(HttpError.badRequest('Missing body'));
+        if (!req.body.name) return next(HttpError.badRequest('A name is required'));
+        if (!req.body.theme) return next(HttpError.badRequest('A theme is required'));
+
+        context.data = _.chain(req.body).clone().extend({ resourceId: uuid.v1() }).value();
+        next();
+    }
+
+    function extractResourceId(context, req, next) {
+        if (!req.params.resourceId) return next(HttpError.badRequest('A resourceId is required'));
+        context.resourceId = req.params.resourceId;
+        next();
+    }
+
+    function createGroup(context, next) {
+        group.create(context.data, function(err, group) {
+            context.group = group;
+            next(err);
         })
     }
 
-    function extractCriteria(req, next) {
-        next(null, _.reduce(req.query, function(criteria, value, key) {
-            criteria[key] = value;
-            return criteria;
-        }, {}))
+    function updateGroup(context, next) {
+        group.update(context.data, function(err, group) {
+            context.group = group;
+            next(err);
+        })
     }
 
-    function extractGroupData(req, next) {
-        if (!_.isObject(req.body)) return next(new Error('Missing body'));
-        if (!req.body.name) return next(new Error('A name is required'));
-        if (!req.body.theme) return next(new Error('A theme is required'));
+    function listGroups(context, next) {
+        group.list(context.criteria, function(err, groups) {
+            context.groups = groups;
+            next(err);
+        })
+    }
 
-        next(null, _.chain(req.body).clone().extend({
-            resourceId: uuid.v1()
-        }).value());
+    function removeGroup(context, next) {
+        group.remove(context.resourceId, function(err, group) {
+            if (err) return next(HttpError.internalServerError(err.message));
+            if (!group) return next(HttpError.notFound('The group does not exist'));
+            next();
+        })
+    }
+
+    function exposeGroupData(context, next) {
+        context.response = _.chain(context.group).omit('_id', 'resourceId').extend({ url: '/group/' + context.group.resourceId }).value();
+        next();
+    }
+
+    function exposeGroupList(context, next) {
+        context.response = _.map(context.groups, function(group) {
+            return _.chain(group).omit('_id', 'resourceId').extend({ url: '/group/' + group.resourceId }).value();
+        });
+        next();
+    }
+
+    function done(err, res, context) {
+        if (err) return res.sendError(err);
+        if (context.response) return res.json(context.response);
+        res.send(SC.NO_CONTENT);
     }
 
     return {
