@@ -1,4 +1,4 @@
-<div class="modal-dialog" ng-controller="SampleModalCtrl">
+#<div class="modal-dialog">
     <div class="modal-content">
         <div class="modal-header">
             <h3>Sample</h3>
@@ -8,13 +8,13 @@
                 <alert ng-repeat="message in messages" type="message.type" close="closeMessage($index)">{{message.text}}</alert>
             </div>
             <form class="form-horizontal" role="form">
-                <div class="form-group">
+                <div class="form-group form-group-sample">
                     <label for="name" class="col-lg-2 control-label">Name</label>
                     <div class="col-lg-10">
                         <input id="name" name="name" ng-model="sample.name" class="form-control" placeholder="Lions and Tigers and Bears, oh my!" />
                     </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group form-group-file">
                     <label for="file" class="col-lg-2 control-label">File</label>
                     <div class="col-lg-10">
                         <div class="input-group">
@@ -28,15 +28,45 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="events" class="col-lg-2 control-label">Events</label>
-                    <div class="col-lg-10">
-                        <input id="events" name="events" ng-model="sample.events" class="form-control" placeholder="warning, error, fatality" />
-                    </div>
-                </div>
-                <div class="form-group">
                     <label for="theme" class="col-lg-2 control-label">Theme</label>
                     <div class="col-lg-10">
                         <input id="theme" name="theme" ng-model="sample.theme" class="form-control" placeholder="The Wizard Of Oz" />
+                    </div>
+                </div>
+                <div class="form-group form-group-dynamic-input">
+                    <label class="col-lg-2 control-label">Environments</label>
+                    <div class="col-lg-10">
+                        <div class="input-group" ng-repeat="alert in modal.environments">
+                            <input id="environments_{{$index+1}}" name="environments" ng-model="modal.environments[$index].name" class="form-control" placeholder="production"/>
+                            <span class="input-group-btn" ng-hide="$last" >
+                                <button class="btn btn-default" type="button" ng-click="removeEnvironment($index)">&minus;</button>
+                            </span>
+                            <span class="input-group-btn" ng-show="$last" >
+                                <button class="btn btn-default" type="button" ng-click="addEnvironment()">&plus;</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group form-group-dynamic-input">
+                    <label class="col-lg-2 control-label">Alerts</label>
+                    <div class="col-lg-10">
+                        <div class="input-group" ng-repeat="alert in modal.alerts">
+                            <input id="alerts_{{$index+1}}" name="alerts" ng-model="modal.alerts[$index].name" class="form-control" placeholder="error"/>
+                            <span class="input-group-btn" ng-hide="$last">
+                                <button class="btn btn-default" type="button" ng-click="removeAlert($index)">&minus;</button>
+                            </span>
+                            <span class="input-group-btn" ng-show="$last">
+                                <button class="btn btn-default" type="button" ng-click="addAlert()">&plus;</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-lg-2 control-label">Severity</label>
+                    <div class="col-lg-10">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-default" ng-repeat="severity in [1, 2, 3, 4, 5]" ng-model="modal.severities[severity]" ng-click="blur($event)" btn-checkbox>{{severity}}</button>
+                        </div>
                     </div>
                 </div>
             </form>

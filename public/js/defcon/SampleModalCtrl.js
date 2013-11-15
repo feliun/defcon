@@ -14,43 +14,77 @@
  * limitations under the License.
  */
 
-defconApp.controller('SampleModalCtrl', function SampleModalCtrl($scope, $modal, $http) {
+var SampleModalInstanceCtrl = function ($scope, $modalInstance, $http, sample, samples) {
 
-    $scope.lastTheme;
-
-    $scope.open = function () {
-
-        var modalInstance = $modal.open({
-            templateUrl: '/templates/sampleModalTemplate.html',
-            controller: SampleModalInstanceCtrl,
-            resolve: {
-                samples: function() {
-                    return $scope.samples;
-                },
-                lastTheme: function() {
-                    return $scope.lastTheme;
-                }
-            }
-        })
-
-        function byName(name, theme) {
-            if (arguments.length == 1) return byName.bind(name);
-            return theme.name == name;
-        }
-    }
-})
-
-var SampleModalInstanceCtrl = function ($scope, $modalInstance, $http, samples) {
-
+    $scope.sample = sample || { environments: [], alerts: [], severities: [] };
     $scope.messages = [];
-    $scope.filename;
+    $scope.modal = {
+        environments: toAngularDynamicList($scope.sample.environments),
+        alerts: toAngularDynamicList($scope.sample.alerts),
+        severities: {}
+    }
+
+    function toAngularDynamicList(input) {
+        return _.map(input.concat(''), function(item) {
+            return { name: item };
+        });
+    }
+
+    function fromAngularDynamicList(input) {
+        var names = _.pluck(input, 'name').join(',').split(',');
+        console.log(names.length);
+        return _.chain(names).map(function(name) {
+            return name.trim();
+        }).compact().uniq().value();
+    }
+
+    function toToggleButtonMap(input) {
+        return _.reduce(input, function(memo, item) {
+            memo[item] = true;
+            return memo;
+        }, {});
+    }
+
+    function fromToggleButtonMap(input) {
+        return _.reduce(input, function(memo, value, key) {
+            return value ? memo.concat(key) : memo;
+        }, []);
+    }
+
+    $scope.blur = function($event) {
+        $($event.target).blur();
+    }
 
     $scope.onFileSelect = function($files) {
         $scope.file = $files[0];
         $scope.filename = $scope.file.name;
     }
 
+    $scope.addEnvironment = function(sample) {
+        $scope.modal.environments.push({ name: '' });
+    }
+
+    $scope.removeEnvironment = function($index) {
+        $scope.modal.environments.splice($index, 1);
+    };
+
+    $scope.addAlert = function() {
+        $scope.modal.alerts.push({ name: '' });
+    }
+
+    $scope.removeAlert = function($index) {
+        $scope.modal.alerts.splice($index, 1);
+    };
+
     $scope.ok = function(sample) {
+        sample.environments = fromAngularDynamicList($scope.modal.environments);
+        $scope.modal.environments = toAngularDynamicList(sample.environments);
+        sample.alerts = fromAngularDynamicList($scope.modal.alerts);
+        $scope.modal.alerts = toAngularDynamicList(sample.alerts);
+
+        sample.severities = fromToggleButtonMap($scope.modal.severities);
+        $scope.modal.severities = toToggleButtonMap(sample.severities);
+
         var save = sample && sample.url ? update : create;
         save(sample).success(function(data) {
             samples.push(_.extend(sample, data));

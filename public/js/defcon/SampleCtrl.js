@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-defconApp.controller('SampleCtrl', function SampleCtrl($scope, $http) {
+defconApp.filter('list', function() {
+    return function(input) {
+        return input.join(',').split(',').join(', ');
+    }
+})
+
+defconApp.controller('SampleCtrl', function SampleCtrl($scope, $modal, $http) {
 
     $scope.samples = [];
 
@@ -23,6 +29,33 @@ defconApp.controller('SampleCtrl', function SampleCtrl($scope, $http) {
             return { name: name };
         }).value();
     }, true);
+
+    $scope.byTheme = function(theme) {
+        return function(sample) {
+            return sample.theme == theme.name;
+        }
+    };
+
+    $scope.open = function(sample) {
+
+        var modalInstance = $modal.open({
+            templateUrl: '/templates/sampleModalTemplate.html',
+            controller: SampleModalInstanceCtrl,
+            resolve: {
+                sample: function() {
+                    return sample;
+                },
+                samples: function() {
+                    return $scope.samples;
+                }
+            }
+        })
+
+        function byName(name, theme) {
+            if (arguments.length == 1) return byName.bind(name);
+            return theme.name == name;
+        }
+    }
 
     $scope.remove = function(event, sample) {
         event.stopPropagation();

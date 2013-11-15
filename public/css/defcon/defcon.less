@@ -7,6 +7,14 @@ body {
 
 table {
 
+    &.table-groups, &.table-samples {
+        tbody {
+            tr:hover {
+                cursor: pointer
+            }
+        }
+    }
+
     caption {
         font-size: 1.2em;
         font-weight: bold;
@@ -36,6 +44,10 @@ table {
 
     .severity {
         width: 70px;
+    }
+
+    .severities {
+        width: 200px
     }
 
     td.severity {
@@ -83,6 +95,19 @@ table {
             background: -webkit-radial-gradient(circle, #41adfb, #026dfb);
             background: -moz-radial-gradient(circle, #41adfb, #026dfb);
         }
+    }
+}
+
+.input-group-btn .btn-default {
+    width: 40px;
+}
+
+.form-group-dynamic-input {
+    .input-group {
+        margin-bottom: 15px;
+    }
+    .input-group:last-child {
+        margin-bottom :0px;
     }
 }
 

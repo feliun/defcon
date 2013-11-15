@@ -28,7 +28,7 @@ module.exports = (function() {
     }
 
     function create(req, res, next) {
-        var context = new Context(this);
+        var context = new Context();
         async.series([
             context.apply(tasks.extractAlertData, req),
             context.apply(tasks.createDocument, alert),
@@ -43,7 +43,7 @@ module.exports = (function() {
     }
 
     function list(req, res, next) {
-        var context = new Context(this, { criteria: req.query });
+        var context = new Context({ criteria: req.query });
         async.series([
             context.apply(tasks.listDocuments, alert),
             context.apply(tasks.exposeDocuments, alert)
@@ -54,7 +54,7 @@ module.exports = (function() {
     }
 
     function remove(req, res, next) {
-        var context = new Context(this);
+        var context = new Context();
         async.series([
             context.apply(tasks.extractResourceId, req),
             context.apply(tasks.removeDocument, alert)

@@ -1,20 +1,24 @@
 <div ng-controller="SampleCtrl">
     <div ng-show="samples.length" ng-repeat="theme in themes | orderBy:['name']">
-        <table class="table table-hover">
+        <table class="table table-hover table-samples">
             <caption>Theme: {{theme.name}}</caption>
             <thead>
                 <tr>
                     <th class="sample">Sample</th>
                     <th class="filename">Filename</th>
-                    <th class="events">Events</th>
+                    <th class="environments">Environments</th>
+                    <th class="alerts">Alerts</th>
+                    <th class="severities">Severity</th>
                     <th class="action">&nbsp;</th>
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="sample in samples | filter:{ theme: theme.name } | orderBy:['name']">
+                <tr ng-repeat="sample in samples | filter:byTheme(theme) | orderBy:['name']" ng-click="open(sample)">
                     <td class="sample">{{sample.name}}</td>
                     <td class="filename">{{sample.filename}}</td>
-                    <td class="events">{{sample.events}}</td>
+                    <td class="environments">{{sample.environments | list   }}</td>
+                    <td class="alerts">{{sample.alerts | list}}</td>
+                    <td class="severities">{{sample.severities | list}}</td>
                     <td class="action">
                         <button ng-click="play($event, sample)" type="button" class="btn btn-default btn-xs">
                             <span class="glyphicon glyphicon-play"></span>
@@ -28,7 +32,7 @@
         </table>
     </div>
 
-    <div ng-controller="SampleModalCtrl">
+    <div>
         <button ng-click="open()" type="button" class="btn btn-primary pull-right">
             <span class="glyphicon glyphicon-plus">Add</span>
         </button>

@@ -2,7 +2,7 @@
  * Copyright 2010 Acuminous Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * you may not use  file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
@@ -29,30 +29,30 @@ module.exports = (function() {
     }
 
     function create(req, res, next) {
-        var context = new Context(this);
+        var context = new Context();
         async.series([
             context.apply(tasks.extractSampleData, req),
             context.apply(tasks.createDocument, sample),
             context.apply(tasks.exposeDocument, sample)
         ], function(err) {
             if (err) return next(err);
-            res.json(content.response);
+            res.json(context.response);
         });
     }
 
     function list(req, res, next) {
-        var context = new Context(this, { criteria: req.query });
+        var context = new Context({ criteria: req.query });
         async.series([
             context.apply(tasks.listDocuments, sample),
             context.apply(tasks.exposeDocuments, sample)
         ], function(err) {
             if (err) return next(err);
-            res.json(content.response);
+            res.json(context.response);
         });
     }
 
     function data(req, res, next) {
-        var context = new Context(this);
+        var context = new Context();
         async.series([
             context.apply(tasks.extractResourceId, req),
             context.apply(tasks.getDocument, sample),
@@ -60,19 +60,19 @@ module.exports = (function() {
             context.apply(tasks.serveSampleFile, res)
         ], function(err) {
             if (err) return next(err);
-            res.json(content.response);
+            res.json(context.response);
         });
     }
 
     function remove(req, res, next) {
-        var context = new Context(this);
+        var context = new Context();
         async.series([
             context.apply(tasks.extractResourceId, req),
             context.apply(tasks.removeDocument, sample),
             context.apply(tasks.unlinkSampleFile)
         ], function(err) {
             if (err) return next(err);
-            res.json(content.response);
+            res.json(context.response);
         });
     }
 
