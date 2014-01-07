@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-var GroupModalInstanceCtrl = function($scope, $modalInstance, $http, group, groups) {
+var GroupModalInstanceCtrl = function($scope, $modalInstance, $http, group) {
 
     $scope.group = group;
     $scope.messages = [];
@@ -22,7 +22,6 @@ var GroupModalInstanceCtrl = function($scope, $modalInstance, $http, group, grou
     $scope.ok = function(group) {
         var save = group && group.url ? update : create;
         save(group).success(function(data) {
-            groups.push(_.extend(group, data));
             $modalInstance.close(group);
         }).error(function(text) {
             $scope.message(text, 'danger');
@@ -47,5 +46,5 @@ var GroupModalInstanceCtrl = function($scope, $modalInstance, $http, group, grou
 
     $scope.closeMessage = function(index) {
         $scope.messages.splice(index, 1);
-    }
+    }   
 };

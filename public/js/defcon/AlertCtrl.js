@@ -17,7 +17,7 @@
 defconApp.controller('AlertCtrl', function AlertCtrl($scope, $http, $timeout) {
 
     (function update() {
-        $timeout(update, 1000);
+        // $timeout(update, 1000);
         refresh();
     }());
 
@@ -25,7 +25,7 @@ defconApp.controller('AlertCtrl', function AlertCtrl($scope, $http, $timeout) {
         event.stopPropagation();
         event.preventDefault();
         $http.delete(alert.url).success(function() {
-            $scope.alerts = _.without($scope.alerts, alert);
+            refresh();
         }).error(function(text) {
             $scope.message(text, 'danger');
         })

@@ -37,31 +37,26 @@ defconApp.controller('SampleCtrl', function SampleCtrl($scope, $modal, $http) {
     };
 
     $scope.open = function(sample) {
-
         var modalInstance = $modal.open({
             templateUrl: '/templates/sampleModalTemplate.html',
             controller: SampleModalInstanceCtrl,
             resolve: {
                 sample: function() {
-                    return sample;
-                },
-                samples: function() {
-                    return $scope.samples;
+                    return _.clone(sample);
                 }
             }
         })
 
-        function byName(name, theme) {
-            if (arguments.length == 1) return byName.bind(name);
-            return theme.name == name;
-        }
+        modalInstance.result.then(function(selectedItem) {
+            refresh();
+        });
     }
 
     $scope.remove = function(event, sample) {
         event.stopPropagation();
         event.preventDefault();
         $http.delete(sample.url).success(function() {
-            $scope.samples = _.without($scope.samples, sample);
+            refresh();
         }).error(function(text) {
             $scope.messages = [{ text: text || 'An unexpected error occurred', type: type || 'error' }];
         })

@@ -22,20 +22,21 @@ defconApp.controller('GroupCtrl', function GroupCtrl($scope, $http, $timeout, $m
             controller: GroupModalInstanceCtrl,
             resolve: {
                 group: function() {
-                    return group;
-                },
-                groups: function() {
-                    return $scope.groups
+                    return _.clone(group);
                 }
             }
         });
+
+        modalInstance.result.then(function(selectedItem) {
+            refresh();
+        });        
     }
 
     $scope.remove = function(event, group) {
         event.stopPropagation();
         event.preventDefault();
         $http.delete(group.url).success(function(data) {
-            $scope.groups = _.without($scope.groups, group);
+            refresh();
         }).error(function(text) {
             $scope.message(text, 'danger');
         })

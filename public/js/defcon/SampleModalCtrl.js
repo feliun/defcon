@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-var SampleModalInstanceCtrl = function ($scope, $modalInstance, $http, sample, samples) {
+var SampleModalInstanceCtrl = function($scope, $modalInstance, $http, $upload, sample) {
 
     $scope.sample = sample || { environments: [], alerts: [], severities: [] };
     $scope.messages = [];
     $scope.modal = {
         environments: toAngularDynamicList($scope.sample.environments),
         alerts: toAngularDynamicList($scope.sample.alerts),
-        severities: {}
+        severities: toToggleButtonMap($scope.sample.severities)
     }
 
     function toAngularDynamicList(input) {
@@ -32,7 +32,6 @@ var SampleModalInstanceCtrl = function ($scope, $modalInstance, $http, sample, s
 
     function fromAngularDynamicList(input) {
         var names = _.pluck(input, 'name').join(',').split(',');
-        console.log(names.length);
         return _.chain(names).map(function(name) {
             return name.trim();
         }).compact().uniq().value();
@@ -87,12 +86,9 @@ var SampleModalInstanceCtrl = function ($scope, $modalInstance, $http, sample, s
 
         var save = sample && sample.url ? update : create;
         save(sample).success(function(data) {
-            samples.push(_.extend(sample, data));
-            $scope.$apply();
             $modalInstance.close();
         }).error(function(text) {
             $scope.messages = [{ text: text, type:  'danger' }];
-            $scope.$apply();
         })
     }
 
@@ -101,20 +97,33 @@ var SampleModalInstanceCtrl = function ($scope, $modalInstance, $http, sample, s
     }
 
     function update(sample) {
-        return $http.uploadFile({
-            url: 'sample',
+        if (!$scope.file) return $http.put(sample.url, sample);
+        return $upload.upload({
+            url: sample.url,
             method: 'PUT',
             data: sample,
+            formDataAppender: formDataAppender,                                
             file: $scope.file
         })
     }
 
     function create(sample) {
-        return $http.uploadFile({
+        return $upload.upload({
             url: 'sample',
-            data: sample,
+            data: sample,   
+            formDataAppender: formDataAppender,                    
             file: $scope.file
         })
+    }
+
+    function formDataAppender(data, key, value) {        
+        if (angular.isArray(value)) {
+            angular.forEach(value, function(v) {
+                data.append(key, v);
+            });
+        } else {
+            data.append(key, value);
+        }                
     }
 
     $scope.closeMessage = function(index) {

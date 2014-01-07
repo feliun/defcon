@@ -23,6 +23,7 @@ module.exports = (function() {
 
     function init(app) {
         app.post('/sample', create);
+        app.put('/sample/:resourceId', update);
         app.get('/sample/:resourceId/data', data)
         app.get('/sample', list);
         app.delete('/sample/:resourceId', remove);
@@ -39,6 +40,18 @@ module.exports = (function() {
             res.json(context.response);
         });
     }
+
+    function update(req, res, next) {
+        var context = new Context();
+        async.series([
+            context.apply(tasks.extractSampleData, req),
+            context.apply(tasks.updateDocument, sample),
+            context.apply(tasks.exposeDocument, sample)
+        ], function(err) {
+            if (err) return next(err);
+            res.json(context.response);
+        });
+    }   
 
     function list(req, res, next) {
         var context = new Context({ criteria: req.query });
