@@ -22,42 +22,18 @@ var Context = require('../lib/Context');
 module.exports = (function() {
 
     function init(app) {
-        app.post('/api/v1/event', create);
-        app.get('/api/v1/event', list)
-        app.delete('/api/v1/event/:resourceId', remove);
+        app.post('/alert', create);
     }
 
     function create(req, res, next) {
         var context = new Context();
         async.series([
-            context.apply(tasks.extractEventData, req),
+            context.apply(tasks.extractAlertData, req),
             context.apply(tasks.createDocument, event),
             context.apply(tasks.findMatchingSamples),
             context.apply(tasks.pickSample),
             context.apply(tasks.playSample),
             context.apply(tasks.exposeDocument, event)
-        ], function(err) {
-            if (err) return next(err);
-            res.json(context.response);
-        });
-    }
-
-    function list(req, res, next) {
-        var context = new Context({ criteria: req.query });
-        async.series([
-            context.apply(tasks.listDocuments, event),
-            context.apply(tasks.exposeDocuments, event)
-        ], function(err) {
-            if (err) return next(err);
-            res.json(context.response);
-        });
-    }
-
-    function remove(req, res, next) {
-        var context = new Context();
-        async.series([
-            context.apply(tasks.extractResourceId, req),
-            context.apply(tasks.removeDocument, event)
         ], function(err) {
             if (err) return next(err);
             res.json(context.response);

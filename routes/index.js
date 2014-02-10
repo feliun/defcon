@@ -16,7 +16,7 @@
 
 module.exports.init = function(app) {
 
-    var routes = ['./apiRoutes', './eventRoutes', './systemRoutes', './sampleRoutes'];
+    var routes = ['./apiRoutes', './alertRoutes', './eventRoutes', './systemRoutes', './sampleRoutes'];
 
     routes.forEach(function(route) {
         require(route).init(app);
