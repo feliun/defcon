@@ -15,36 +15,42 @@
  */
 
 var async = require('async');
-var group = require('../lib/store').group();
+var event = require('../lib/store').event();
 var tasks = require('../lib/tasks/index');
 var Context = require('../lib/Context');
 
 module.exports = (function() {
 
     function init(app) {
-        app.post('/group', create);
-        app.put('/group/:resourceId', update);
-        app.get('/group', list)
-        app.delete('/group/:resourceId', remove);
+        app.post('/api/v1/event', create);
+        app.get('/api/v1/event', list)
+        app.delete('/api/v1/event/:resourceId', remove);
+    }
+
+    function legacyCreate(req, res, next) {
+        var context = new Context();
+        async.series([
+            context.apply(tasks.extractLegacyEventData, req),
+            context.apply(tasks.createDocument, event),
+            context.apply(tasks.findMatchingSamples),
+            context.apply(tasks.pickSample),
+            context.apply(tasks.playSample),
+            context.apply(tasks.exposeDocument, event)
+        ], function(err) {
+            if (err) return next(err);
+            res.json(context.response);
+        });        
     }
 
     function create(req, res, next) {
         var context = new Context();
         async.series([
-            context.apply(tasks.extractGroupData, req),
-            context.apply(tasks.createDocument, group)
-        ], function(err) {
-            if (err) return next(err);
-            res.json(context.response);
-        });
-    }
-
-    function update(req, res, next) {
-        var context = new Context();
-        async.series([
-            context.apply(tasks.extractGroupData, req),
-            context.apply(tasks.updateDocument, group),
-            context.apply(tasks.exposeDocument, group)
+            context.apply(tasks.extractEventData, req),
+            context.apply(tasks.createDocument, event),
+            context.apply(tasks.findMatchingSamples),
+            context.apply(tasks.pickSample),
+            context.apply(tasks.playSample),
+            context.apply(tasks.exposeDocument, event)
         ], function(err) {
             if (err) return next(err);
             res.json(context.response);
@@ -54,8 +60,8 @@ module.exports = (function() {
     function list(req, res, next) {
         var context = new Context({ criteria: req.query });
         async.series([
-            context.apply(tasks.listDocuments, group),
-            context.apply(tasks.exposeDocuments, group)
+            context.apply(tasks.listDocuments, event),
+            context.apply(tasks.exposeDocuments, event)
         ], function(err) {
             if (err) return next(err);
             res.json(context.response);
@@ -66,7 +72,7 @@ module.exports = (function() {
         var context = new Context();
         async.series([
             context.apply(tasks.extractResourceId, req),
-            context.apply(tasks.removeDocument, group)
+            context.apply(tasks.removeDocument, event)
         ], function(err) {
             if (err) return next(err);
             res.json(context.response);

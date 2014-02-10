@@ -14,28 +14,30 @@
  * limitations under the License.
  */
 
-defconApp.controller('PageCtrl', function PageCtrl($scope, $rootScope, $http) {
+var SystemModalInstanceCtrl = function($scope, $modalInstance, $http, system) {
 
-    $scope.tabs = {
-        events: { template: 'eventTemplate.html' },
-        systems: { template: 'systemTemplate.html' },
-        samples: { template: 'sampleTemplate.html' }
-    }
-    $scope.currentTab = $scope.tabs.events;
+    $scope.system = system;
     $scope.messages = [];
 
-    $http.get('/api').success(function(api) {
-        $rootScope.api = api;
-    });
-
-    $scope.activate = function(event, tab) {
-        $scope.currentTab = $scope.tabs[tab];
-        event.stopPropagation();
-        event.preventDefault();
+    $scope.ok = function(system) {
+        var save = system && system.url ? update : create;
+        save(system).success(function(data) {
+            $modalInstance.close(system);
+        }).error(function(text) {
+            $scope.message(text, 'danger');
+        })
     }
 
-    $scope.isActive = function(tab) {
-        return $scope.currentTab === $scope.tabs[tab];
+    $scope.cancel = function() {
+        $modalInstance.dismiss('cancel');
+    }
+
+    function update(system) {
+        return $http.put(system.url, system);
+    }
+
+    function create(system) {
+        return $http.post($scope.api.v1.system, system);
     }
 
     $scope.message = function(text, type) {
@@ -44,5 +46,5 @@ defconApp.controller('PageCtrl', function PageCtrl($scope, $rootScope, $http) {
 
     $scope.closeMessage = function(index) {
         $scope.messages.splice(index, 1);
-    }
-})
+    }   
+};

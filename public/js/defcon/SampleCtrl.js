@@ -69,7 +69,7 @@ defconApp.controller('SampleCtrl', function SampleCtrl($scope, $modal, $http) {
     }
 
     function refresh() {
-        $http.get('sample').success(function(samples) {
+        $http.get($scope.api.v1.sample).success(function(samples) {
             $scope.samples = samples;
         });
     }

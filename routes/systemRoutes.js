@@ -15,27 +15,36 @@
  */
 
 var async = require('async');
-var alert = require('../lib/store').alert();
+var system = require('../lib/store').system();
 var tasks = require('../lib/tasks/index');
 var Context = require('../lib/Context');
 
 module.exports = (function() {
 
     function init(app) {
-        app.post('/alert', create);
-        app.get('/alert', list)
-        app.delete('/alert/:resourceId', remove);
+        app.post('/api/v1/system', create);
+        app.put('/api/v1/system/:resourceId', update);
+        app.get('/api/v1/system', list)
+        app.delete('/api/v1/system/:resourceId', remove);
     }
 
     function create(req, res, next) {
         var context = new Context();
         async.series([
-            context.apply(tasks.extractAlertData, req),
-            context.apply(tasks.createDocument, alert),
-            context.apply(tasks.findMatchingSamples),
-            context.apply(tasks.pickSample),
-            context.apply(tasks.playSample),
-            context.apply(tasks.exposeDocument, alert)
+            context.apply(tasks.extractSystemData, req),
+            context.apply(tasks.createDocument, system)
+        ], function(err) {
+            if (err) return next(err);
+            res.json(context.response);
+        });
+    }
+
+    function update(req, res, next) {
+        var context = new Context();
+        async.series([
+            context.apply(tasks.extractSystemData, req),
+            context.apply(tasks.updateDocument, system),
+            context.apply(tasks.exposeDocument, system)
         ], function(err) {
             if (err) return next(err);
             res.json(context.response);
@@ -45,8 +54,8 @@ module.exports = (function() {
     function list(req, res, next) {
         var context = new Context({ criteria: req.query });
         async.series([
-            context.apply(tasks.listDocuments, alert),
-            context.apply(tasks.exposeDocuments, alert)
+            context.apply(tasks.listDocuments, system),
+            context.apply(tasks.exposeDocuments, system)
         ], function(err) {
             if (err) return next(err);
             res.json(context.response);
@@ -57,7 +66,7 @@ module.exports = (function() {
         var context = new Context();
         async.series([
             context.apply(tasks.extractResourceId, req),
-            context.apply(tasks.removeDocument, alert)
+            context.apply(tasks.removeDocument, system)
         ], function(err) {
             if (err) return next(err);
             res.json(context.response);

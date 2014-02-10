@@ -108,8 +108,9 @@ var SampleModalInstanceCtrl = function($scope, $modalInstance, $http, $upload, s
     }
 
     function create(sample) {
+        if (!$scope.file) return $http.post($scope.api.v1.sample, sample);        
         return $upload.upload({
-            url: 'sample',
+            url: $scope.api.v1.sample,
             data: sample,   
             formDataAppender: formDataAppender,                    
             file: $scope.file

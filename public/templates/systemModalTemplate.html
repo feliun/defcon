@@ -1,30 +1,30 @@
 <div class="modal-dialog">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>Group</h3>
+            <h3>System</h3>
         </div>
         <div class="modal-body">
             <div>
                 <alert ng-repeat="message in messages" type="message.type" close="closeMessage($index)">{{message.text}}</alert>
             </div>
             <form class="form-horizontal" role="form">
-                <input name="url" type="hidden" ng-model="group.url" />
+                <input name="url" type="hidden" ng-model="system.url" />
                 <div class="form-group">
                     <label for="name" class="col-lg-2 control-label">Name</label>
                     <div class="col-lg-10">
-                        <input id="name" name="name" ng-model="group.name" class="form-control" placeholder="Frontend" />
+                        <input id="name" name="name" ng-model="system.name" class="form-control" placeholder="WOPR" />
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="theme" class="col-lg-2 control-label">Theme</label>
                     <div class="col-lg-10">
-                        <input id="theme" name="theme" ng-model="group.theme" class="form-control" placeholder="The Wizard Of Oz" />
+                        <input id="theme" name="theme" ng-model="system.theme" class="form-control" placeholder="War Games" />
                     </div>
                 </div>
             </form>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-primary" ng-click="ok(group)">OK</button>
+            <button class="btn btn-primary" ng-click="ok(system)">OK</button>
             <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
         </div>
     </div>

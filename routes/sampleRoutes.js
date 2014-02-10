@@ -22,11 +22,11 @@ var Context = require('../lib/Context');
 module.exports = (function() {
 
     function init(app) {
-        app.post('/sample', create);
-        app.put('/sample/:resourceId', update);
-        app.get('/sample/:resourceId/data', data)
-        app.get('/sample', list);
-        app.delete('/sample/:resourceId', remove);
+        app.post('/api/v1/sample', create);
+        app.put('/api/v1/sample/:resourceId', update);
+        app.get('/api/v1/sample/:resourceId/data', data)
+        app.get('/api/v1/sample', list);
+        app.delete('/api/v1/sample/:resourceId', remove);
     }
 
     function create(req, res, next) {

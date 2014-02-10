@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-var GroupModalInstanceCtrl = function($scope, $modalInstance, $http, group) {
+var EventModalInstanceCtrl = function($scope, $modalInstance, $http) {
 
-    $scope.group = group;
-    $scope.messages = [];
+    $scope.event = {};
+    $scope.messages = []; 
+    $scope.modal = {
+        severities: {}
+    }     
 
-    $scope.ok = function(group) {
-        var save = group && group.url ? update : create;
-        save(group).success(function(data) {
-            $modalInstance.close(group);
+    $scope.ok = function(event) {
+        create(event).success(function(data) {
+            $modalInstance.close(event);
         }).error(function(text) {
             $scope.message(text, 'danger');
         })
@@ -32,12 +34,12 @@ var GroupModalInstanceCtrl = function($scope, $modalInstance, $http, group) {
         $modalInstance.dismiss('cancel');
     }
 
-    function update(group) {
-        return $http.put(group.url, group);
-    }
+    $scope.setSeverity = function(severity) {
+        $scope.event.severity = severity;
+    }    
 
-    function create(group) {
-        return $http.post('group', group);
+    function create(event) {
+        return $http.post($scope.api.v1.event, event);
     }
 
     $scope.message = function(text, type) {

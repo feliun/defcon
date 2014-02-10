@@ -14,13 +14,25 @@
  * limitations under the License.
  */
 
-module.exports.init = function(app) {
 
-    var routes = ['./apiRoutes', './eventRoutes', './systemRoutes', './sampleRoutes'];
+module.exports = (function() {
 
-    routes.forEach(function(route) {
-        require(route).init(app);
-    })
+    function init(app) {
+        app.get('/api', api)
+    }
 
-    return app;
-}
+    function api(req, res) {
+        res.json({
+            v1: {
+                event: '/api/v1/event',
+                system: '/api/v1/system',                
+                sample: '/api/v1/sample'
+            }
+        });
+    }
+
+    return {
+        init: init
+    }    
+
+})();

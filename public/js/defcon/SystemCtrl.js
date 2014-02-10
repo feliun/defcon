@@ -14,17 +14,28 @@
  * limitations under the License.
  */
 
-defconApp.controller('AlertCtrl', function AlertCtrl($scope, $http, $timeout) {
+defconApp.controller('SystemCtrl', function SystemCtrl($scope, $http, $timeout, $modal) {
 
-    (function update() {
-        // $timeout(update, 1000);
-        refresh();
-    }());
+    $scope.open = function(system) {
+        var modalInstance = $modal.open({
+            templateUrl: '/templates/systemModalTemplate.html',
+            controller: SystemModalInstanceCtrl,
+            resolve: {
+                system: function() {
+                    return _.clone(system);
+                }
+            }
+        });
 
-    $scope.remove = function(event, alert) {
+        modalInstance.result.then(function(selectedItem) {
+            refresh();
+        });        
+    }
+
+    $scope.remove = function(event, system) {
         event.stopPropagation();
         event.preventDefault();
-        $http.delete(alert.url).success(function() {
+        $http.delete(system.url).success(function(data) {
             refresh();
         }).error(function(text) {
             $scope.message(text, 'danger');
@@ -32,10 +43,8 @@ defconApp.controller('AlertCtrl', function AlertCtrl($scope, $http, $timeout) {
     }
 
     function refresh() {
-        $http.get('alert').success(function(alerts) {
-            $scope.alerts = _.map(alerts, function(alert) {
-                return _.extend(alert, { timeago: moment(alert.date).fromNow() })
-            });
+        $http.get($scope.api.v1.system).success(function(data) {
+            $scope.systems = data;
         });
     }
 

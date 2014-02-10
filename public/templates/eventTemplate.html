@@ -1,0 +1,45 @@
+<div ng-controller="EventCtrl">
+    <table ng-show="events.length" class="table table-hover table-condensed table-events">
+        <thead>
+            <tr>
+                <th class="severity">Severity</th>
+                <th class="application">Application</th>                
+                <th class="system">System</th>                
+                <th class="environment">Environment</th>
+                <th class="host">Host</th>
+                <th class="type">Type</th>
+                <th class="timeago">Occurred</th>
+                <th class="action">&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="event in events | orderBy:['-date']" cm-handlebars ng-click="handleClick($event, event)" title="{{event.message}}">
+                <td class="severity"><span class="defcon defcon-{{event.severity}}">{{event.severity}}</span></td>
+                <td class="application">{{event.application}}</td>
+                <td class="system">{{event.system}}</td>
+                <td class="environment">{{event.environment}}</td>
+                <td class="host">{{event.host}}</td>
+                <td class="type">{{event.type}}</td>
+                <td class="timeago" title="{{event.date}}">{{event.timeago}}</td>
+                <td class="action">
+                    <a ng-show="event.link" href="{{event.link}}"><button type="button" class="btn btn-default btn-xs link-btn">
+                        <span class="glyphicon glyphicon-hand-right"></span>
+                    </button></a>
+                    <button type="button" class="btn btn-default btn-xs remove-btn">
+                        <span class="glyphicon glyphicon-remove"></span>
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!--
+    <div>
+        <button ng-click="open()" type="button" class="btn btn-primary pull-right">
+            <span class="glyphicon glyphicon-plus">Add</span>
+        </button>
+    </div>
+    -->
+
+    <div ng-hide="events.length">There are no events.</div>
+</div>

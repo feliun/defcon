@@ -1,0 +1,57 @@
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Event</h3>
+        </div>
+        <div class="modal-body">
+            <div>
+                <alert ng-repeat="message in messages" type="message.type" close="closeMessage($index)">{{message.text}}</alert>
+            </div>
+
+            <form class="form-horizontal" role="form">
+                <div class="form-group">
+                    <label for="application" class="col-lg-2 control-label">Application</label>
+                    <div class="col-lg-10">
+                        <input id="application" name="application" ng-model="event.application" class="form-control" placeholder="Tic-Tac-Toe" />
+                    </div>
+                </div>                
+                <div class="form-group">
+                    <label for="system" class="col-lg-2 control-label">System</label>
+                    <div class="col-lg-10">
+                        <input id="system" name="system" ng-model="event.system" class="form-control" placeholder="WOPR" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="environment" class="col-lg-2 control-label">Environment</label>
+                    <div class="col-lg-10">
+                        <input id="environment" name="environment" ng-model="event.environment" class="form-control" placeholder="Production" />
+                    </div>
+                </div>                                 
+                <div class="form-group">
+                    <label for="type" class="col-lg-2 control-label">Type</label>
+                    <div class="col-lg-10">
+                        <input id="type" name="type" ng-model="event.type" class="form-control" placeholder="Error" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-lg-2 control-label">Severity</label>
+                    <div class="col-lg-10">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-default" ng-repeat="severity in [1, 2, 3, 4, 5]" ng-click="setSeverity(severity)">{{severity}}</button>
+                        </div>
+                    </div>
+                </div>                                
+                <div class="form-group">
+                    <label for="message" class="col-lg-2 control-label">Message</label>
+                    <div class="col-lg-10">
+                        <input id="message" name="message" ng-model="event.message" class="form-control" placeholder="How about a nice game of chess?" />
+                    </div>
+                </div>                                                
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" ng-click="ok(event)">OK</button>
+            <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+        </div>
+    </div>
+</div>
