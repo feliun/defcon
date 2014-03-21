@@ -3,9 +3,9 @@
         <thead>
             <tr>
                 <th class="severity">Severity</th>
+                <th class="environment">Environment</th>
                 <th class="application">Application</th>                
                 <th class="system">System</th>                
-                <th class="environment">Environment</th>
                 <th class="host">Host</th>
                 <th class="type">Type</th>
                 <th class="timeago">Occurred</th>
@@ -15,9 +15,9 @@
         <tbody>
             <tr ng-repeat="event in events | orderBy:['-date']" cm-handlebars ng-click="handleClick($event, event)" title="{{event.message}}">
                 <td class="severity"><span class="defcon defcon-{{event.severity}}">{{event.severity}}</span></td>
+                <td class="environment"><span class="defcon-{{event.environment}}">{{event.environment}}</span></td>
                 <td class="application">{{event.application}}</td>
                 <td class="system">{{event.system}}</td>
-                <td class="environment">{{event.environment}}</td>
                 <td class="host">{{event.host}}</td>
                 <td class="type">{{event.type}}</td>
                 <td class="timeago" title="{{event.date}}">{{event.timeago}}</td>
