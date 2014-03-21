@@ -51,7 +51,7 @@ defconApp.controller('EventCtrl', function EventCtrl($scope, $modal, $http, $tim
     function refresh() {
         $http.get($scope.api.v1.event).success(function(events) {
             $scope.events = _.map(events, function(event) {
-                return _.extend(event, { timeago: moment(event.date).fromNow() })
+                return _.extend(event, { timeago: moment(event.date).fromNow(), formattedDate: moment(event.date).format('MMM D YYYY, h:mm:ss a') });
             });
         });
     }
