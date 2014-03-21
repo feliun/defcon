@@ -15,7 +15,7 @@
         <tbody>
             <tr ng-repeat="event in events | orderBy:['-date']" cm-handlebars ng-click="handleClick($event, event)" title="{{event.message}}">
                 <td class="severity"><span class="defcon defcon-{{event.severity}}">{{event.severity}}</span></td>
-                <td class="environment"><span class="defcon-{{event.environment}}">{{event.environment}}</span></td>
+                <td class="environment"><span class="defcon-{{cssCase event.environment}}">{{titleCase event.environment}}</span></td>
                 <td class="application">{{event.application}}</td>
                 <td class="system">{{event.system}}</td>
                 <td class="host">{{event.host}}</td>

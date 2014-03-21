@@ -31,3 +31,9 @@ Handlebars.registerHelper('titleCase', function(value) {
         return text.charAt(0).toUpperCase() + text.substr(1);
     });
 }); 
+
+Handlebars.registerHelper('cssCase', function(value) {
+    return value.replace(/\w\S*/g, function(text){
+        return text.charAt(0).toLowerCase() + text.substr(1);
+    });
+}); 
